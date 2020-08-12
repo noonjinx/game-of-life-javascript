@@ -50,6 +50,8 @@
 
         <script>
 
+            "use strict";
+
             var _life = function(){
 
                 // Class to represent a life cell
@@ -325,7 +327,7 @@
                 var ctx = canvas.getContext("2d");
 
                 // Set bounds of grid based on cannvas size
-                setBounds = function() {
+                function setBounds() {
 
                     zoom = START_ZOOM;
 
@@ -341,7 +343,7 @@
                 }
 
                 // Make colony from pre-defined shape
-                makeColony = function(shapeName, width, height) {
+                function makeColony(shapeName, width, height) {
 
                     var colony = new Colony();
 
@@ -384,7 +386,7 @@
                 }
 
                 // Draw grid over top of displayed colony
-                drawGrid = function() {
+                function drawGrid() {
 
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = '#808080';
@@ -412,7 +414,7 @@
                     }
 
                 // Draw cell
-                drawCell = function(dx, dy) {
+                function drawCell(dx, dy) {
                     ctx.beginPath();
                     var px = cellsLeft + dx * zoom + 1;
                     var py = cellsTop + dy * zoom;
@@ -420,7 +422,7 @@
                 }
                     
                 // Draw entire colony
-                drawColony = function() {
+                function drawColony() {
 
                     ctx.save();
 
@@ -452,7 +454,7 @@
                 }
 
                 // Regenerate and redisplay on schedule
-                update = function() {
+                function update() {
                     colony.regenerate();
                     window.requestAnimationFrame(drawColony);
                     if ( colony.getCellCount() == 0 || colony.getCellCount() > 999 ) {
@@ -461,14 +463,14 @@
                 }
 
                 // Start colony lifecycle
-                start = function() {
+                function start() {
                     if ( ! timer ) {
                         timer = setInterval(update, 100);
                     }
                 }
 
                 // Pause colony liefcycle
-                stop = function() {
+                function stop() {
                     if ( timer ) {
                         clearInterval(timer);
                         timer = null;
@@ -476,7 +478,7 @@
                 }
 
                 // Reset colony based on dropdown choice
-                reset = function() {
+                function reset() {
                     stop();
                     setBounds();
                     var shapeName = document.getElementById("shapeName").value;
@@ -485,7 +487,7 @@
                 }
 
                 // Clear colony
-                clear = function() {
+                function clear() {
                     stop();
                     colony = new Colony();
                     setBounds();
@@ -493,7 +495,7 @@
                 }
 
                 // Alow user to cick on cell to toggle it
-                toggle = function(ev) {
+                function toggle(ev) {
 
                     var rect = canvas.getBoundingClientRect();
                     var px = ev.clientX - rect.left;
