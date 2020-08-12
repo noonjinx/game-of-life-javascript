@@ -1,120 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html>  
+    <head>
+        <title>Conway's Game of Life</title>
+        <style>
+            th,td {
+                padding:8px 8px 0px 8px;
+            }
+            th,td.unpadded {
+                padding:0;
+            }
+            .shadowed {
+                width: 250px;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
 
-<head>
-    <title>Conway's Game of Life</title>
-    <style>
-        th,
-        td {
-            padding: 8px 8px 0px 8px;
-        }
-
-        th,
-        td.unpadded {
-            padding: 0;
-        }
-
-        .shadowed {
-            width: 250px;
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-            text-align: center;
-        }
-    </style>
-</head>
-
-<body>
-
-    <table class="shadowed" border=0 cellspacing=0 cellpaddng=0 style="outline: thin solid black;">
-        <tr>
-            <th class="unpadded" colspan=2>
-                <div style="padding:8px;text-align:left;background-color:#d8d8d8">
-                    Life v2.0 by Jon Nixon
-                </div>
-            </th>
-        </tr>
-        <tr>
-            <td id="help" style="text-align:left">Choose a shape and press start, or click on cells to change them</td>
-            <td>
-                <div id="stats" style="text-align:right">Generation: 0, Cells: 0</div>
-            </td>
-        </tr>
-        <tr></tr>
-        <td style="text-align:left">
-            Shape:
-            <select id="shapeName" onChange="_life.reset()">
-            </select>
-            <button type="button" onclick="_life.start()">Start</button>
-            <button type="button" onclick="_life.stop()">Stop</button>
-            <button type="button" onclick="_life.reset()">Reset</button>
-        </td>
-        <td style="text-align:right">
-            <button type="button" onclick="_life.clear()">Clear</button>
-        </td>
-        </tr>
-        <tr>
-            <td style="padding:8x" colspan=2>
+        <table class="shadowed" border=0 cellspacing=0 cellpaddng=0 style="outline: thin solid black;">
+            <tr><th class="unpadded" colspan=2><div style="padding:8px;text-align:left;background-color:#d8d8d8">
+                Life v2.0 by Jon Nixon
+            </div></th></tr>
+            <tr>
+                <td id="help" style="text-align:left">Choose a shape and press start, or click on cells to change them</td>
+                <td>
+                    <div id="stats" style="text-align:right">Generation: 0, Cells: 0</div>
+                </td>
+            </tr>
+            <tr></tr>
+                <td style="text-align:left">
+                    Shape:
+                    <select id = "shapeName" onChange="_life.reset()">
+                    </select>
+                    <button type="button" onclick="_life.start()">Start</button>
+                    <button type="button" onclick="_life.stop()">Stop</button>
+                    <button type="button" onclick="_life.reset()">Reset</button>
+                </td>
+                <td style="text-align:right">
+                    <button type="button" onclick="_life.clear()">Clear</button>
+                </td>
+            </tr>
+            <tr><td style="padding:8x" colspan=2>
                 <canvas id="myCanvas" width="670" height="480">
-                    Your browser does not support the HTML5 canvas tag
-                </canvas>
-            </td>
-        </tr>
-    </table>
+                            Your browser does not support the HTML5 canvas tag
+                        </canvas>
+            </td></tr>
+        </table>
 
-    <script>
+        <script>
 
-        var _life = function () {
+            "use strict";
 
-            // Class to represent a life cell
-            class Cell {
+            var _life = function(){
 
-                constructor(cx, cy) {
+                // Class to represent a life cell
+                function Cell(cx, cy) {
                     this._cx = cx;
                     this._cy = cy;
                 }
 
                 // Get x coordinate of cell
-                getX() {
-                    return this._cx;
+                Cell.prototype.getX = function() {
+                    return this._cx; 
                 };
 
                 // Get y coordinate of cell
-                getY() {
+                Cell.prototype.getY = function() {
                     return this._cy;
                 };
 
                 // Get key consisting of both coordinates
-                getKey() {
-                    return this._cx + ":" + this._cy;
+                Cell.prototype.getKey = function() {
+                    return this._cx+":"+this._cy;
                 }
-            }
 
-            // Class to represent a life colony
-            class Colony {
-                
-                constructor() {
+                // Class to represent a life colony
+                function Colony() {
                     this._cells = [];     // Cells in the colony
                     this._generation = 1; // How many generations have lived
                     this._cellCount = 0;  // How many cells are in the colony
                 }
 
                 // Add cell to colony unless it is already there
-                addCell(cell) {
-                    if (!(cell.getKey() in this._cells)) {
+                Colony.prototype.addCell = function(cell) {
+                    if ( ! (cell.getKey() in this._cells) ) {
                         this._cells[cell.getKey()] = cell;
                         this._cellCount++;
                     }
                 }
 
                 // Delete cell from colony if it is there
-                delCell(cell) {
-                    if (cell.getKey() in this._cells) {
+                Colony.prototype.delCell = function(cell) {
+                    if ( cell.getKey() in this._cells ) {
                         delete this._cells[cell.getKey()];
                         this._cellCount--;
                     }
                 }
 
                 // Create new colony by applying life rules to old colony
-                regenerate() {
+                Colony.prototype.regenerate = function(cell) {
 
                     var seenCells = [];         // So we know which cells we have already processed
                     var oldCells = this._cells; // Take copy of old colony
@@ -123,7 +108,7 @@
 
                     // Loop through cells
                     for (var key in oldCells) {
-                        if (oldCells.hasOwnProperty(key)) {
+                        if (oldCells.hasOwnProperty(key)) {         
                             var oldCell = oldCells[key];
 
                             // Get coordinates of old cell
@@ -131,20 +116,20 @@
                             var cy = oldCell.getY();
 
                             // Test old cell and it's neighbours
-                            for (var nx = cx - 1; nx < cx + 2; nx++) {
-                                for (var ny = cy - 1; ny < cy + 2; ny++) {
-                                    var candidate = new Cell(nx, ny);
+                            for ( var nx = cx - 1; nx < cx + 2; nx++ ) {
+                                for ( var ny = cy - 1; ny < cy + 2; ny++ ) {
+                                    var candidate = new Cell( nx, ny );
 
                                     // Only process cells once
-                                    if (!(candidate.getKey() in seenCells)) {
+                                    if ( ! (candidate.getKey() in seenCells) ) {
                                         seenCells[candidate.getKey()] = true;
 
                                         // Count candidate's neighbours in old colony
-                                        var count = this.countNeighbours(candidate, oldCells);
+                                        var count = this.countNeighbours( candidate, oldCells );
 
                                         // Determine if new cell should be alive
-                                        if (count == 3 || (count == 2 && (candidate.getKey() in oldCells))) {
-                                            this.addCell(candidate);
+                                        if ( count == 3 || ( count == 2 && (candidate.getKey() in oldCells) ) ) {
+                                            this.addCell( candidate );
                                         }
                                     }
                                 }
@@ -156,20 +141,20 @@
                 }
 
                 // Count neighbours of a cell
-                countNeighbours(cell, cells) {
+                Colony.prototype.countNeighbours = function(cell, cells) {
 
                     var cx = cell.getX();
                     var cy = cell.getY();
                     var count = 0;
 
                     // Loop through neighbours
-                    for (var nx = cx - 1; nx < cx + 2; nx++) {
-                        for (var ny = cy - 1; ny < cy + 2; ny++) {
-                            if (nx != cx || ny != cy) {
-                                var neighbour = new Cell(nx, ny);
+                    for ( var nx = cx - 1; nx < cx + 2; nx++ ) {
+                        for ( var ny = cy - 1; ny < cy + 2; ny++ ) {
+                            if ( nx != cx || ny != cy ) {
+                                var neighbour = new Cell( nx, ny );
 
                                 // Count neighbours
-                                if (neighbour.getKey() in cells) {
+                                if ( neighbour.getKey() in cells ) {
                                     count++;
                                 }
                             }
@@ -180,366 +165,364 @@
                 }
 
                 // Kill a live cell, recreate a dead cell, return the new status
-                toggle(cell) {
-                    if (cell.getKey() in this._cells) {
-                        this.delCell(cell);
+                Colony.prototype.toggle = function(cell) {
+                    if ( cell.getKey() in this._cells ) {
+                        this.delCell( cell );
                         return false;
                     } else {
-                        this.addCell(cell);
+                        this.addCell( cell );
                         return true;
                     }
                 }
 
                 // How many generations have existed
-                getGeneration() {
+                Colony.prototype.getGeneration = function() {
                     return this._generation;
                 }
 
                 // How many cells are there
-                getCellCount() {
+                Colony.prototype.getCellCount = function() {
                     return this._cellCount;
                 }
 
                 // Allow calling program to view list of cells
-                getCells() {
+                Colony.prototype.getCells = function() {
                     return this._cells;
                 }
-            }
 
-            var START_ZOOM = 8; // Default zoom level (pixels per cell)
+                var START_ZOOM = 8; // Default zoom level (pixels per cell)
+                
+                var cellsWide = 0;     // How many cells fit on screen
+                var cellsLeft = 0;     // Pixel coordinate of left edge of grid in canvas
+                var cellsRight = 0;    // Pixel coordinate of right edge of grid in canvas
+                var cellsHigh = 0;     // How many cells fit on screen
+                var cellsTop = 0;      // Pixel coordinate of top edge of grid in canvas
+                var cellsBottom = 0;   // Pixel coordinate of left edge of grid in canvas
+                var ox = 0;            // x coordinate of cell 0,0 in grid
+                var oy = 0;            // y coordinate of cell 0,0 in grid
+                var zoom = START_ZOOM; // Default zoom level (pixels per screen)
 
-            var cellsWide = 0;     // How many cells fit on screen
-            var cellsLeft = 0;     // Pixel coordinate of left edge of grid in canvas
-            var cellsRight = 0;    // Pixel coordinate of right edge of grid in canvas
-            var cellsHigh = 0;     // How many cells fit on screen
-            var cellsTop = 0;      // Pixel coordinate of top edge of grid in canvas
-            var cellsBottom = 0;   // Pixel coordinate of left edge of grid in canvas
-            var ox = 0;            // x coordinate of cell 0,0 in grid
-            var oy = 0;            // y coordinate of cell 0,0 in grid
-            var zoom = START_ZOOM; // Default zoom level (pixels per screen)
+                var timer = null;          // Timer to control animation
+                var colony = new Colony(); // Colony being grown and displayed
 
-            var timer = null;          // Timer to control animation
-            var colony = new Colony(); // Colony being grown and displayed
+                // Pre-defined shapes
 
-            // Pre-defined shapes
+                var shapes = {
+                    "Empty" : {
+                        "position" : "center",
+                        "rows" : []
+                    },
+                    "F-pentomino" : {
+                        "position" : "center",
+                        "rows" : [
+                            ".OO",
+                            "OO.",
+                            ".O."
+                        ]
+                    },
+                    "Acorn" : {
+                        "position" : "center",
+                        "rows" : [
+                            ".O.....",
+                            "...O...",
+                            "OO..OOO"
+                        ]
+                    },
+                    "Bunnies" : {
+                        "position" : "center",
+                        "rows" : [
+                            "O.....O.",
+                            "..O...O.",
+                            "..O..O O",
+                            ".O.O...."
+                        ]
+                    },
+                    "Lidka" : {
+                        "position" : "center",
+                        "rows" : [
+                            ".O.......",
+                            "O.O......",
+                            ".O.......",
+                            ".........",
+                            ".........",
+                            ".........",
+                            ".........",
+                            ".........",
+                            ".........",
+                            ".........",
+                            "........O",
+                            "......O.O",
+                            ".....OO.O",
+                            ".........",
+                            "....OOO.."
+                        ]
+                    },
+                    "Glider" : {
+                        "position" : "topleft",
+                        "rows" : [
+                            ".O.",
+                            "..O",
+                            "OOO"
+                        ]
+                    },
+                    "Lightweight Spaceship" : {
+                        "position" : "left",
+                        "rows" : [
+                            "O..O.",
+                            "....O",
+                            "O...O",
+                            ".OOOO"
+                        ]
+                    },
+                    "Gosper Glider Gun": {
+                        "position" : "topleft",
+                        "rows" : [
+                            "........................O",
+                            "......................O.O",
+                            "............OO......OO............OO",
+                            "...........O...O....OO............OO",
+                            "OO........O.....O...OO",
+                            "OO........O...O.OO....O.O",
+                            "..........O.....O.......O",
+                            "...........O...O",
+                            "............OO"
+                        ]
+                    },
+                    "Puffer Train": {
+                        "position" : "left",
+                        "rows" : [
+                            "...O.",
+                            "....O",
+                            "O...O",
+                            ".OOOO",
+                            ".....",
+                            ".....",
+                            ".....",
+                            "O....",
+                            ".OO..",
+                            "..O..",
+                            "..O..",
+                            ".O...",
+                            ".....",
+                            ".....",
+                            "...O.",
+                            "....O",
+                            "O...O",
+                            ".OOOO"
+                        ]
+                    },
+                };
 
-            var shapes = {
-                "Empty": {
-                    "position": "center",
-                    "rows": []
-                },
-                "F-pentomino": {
-                    "position": "center",
-                    "rows": [
-                        ".OO",
-                        "OO.",
-                        ".O."
-                    ]
-                },
-                "Acorn": {
-                    "position": "center",
-                    "rows": [
-                        ".O.....",
-                        "...O...",
-                        "OO..OOO"
-                    ]
-                },
-                "Bunnies": {
-                    "position": "center",
-                    "rows": [
-                        "O.....O.",
-                        "..O...O.",
-                        "..O..O O",
-                        ".O.O...."
-                    ]
-                },
-                "Lidka": {
-                    "position": "center",
-                    "rows": [
-                        ".O.......",
-                        "O.O......",
-                        ".O.......",
-                        ".........",
-                        ".........",
-                        ".........",
-                        ".........",
-                        ".........",
-                        ".........",
-                        ".........",
-                        "........O",
-                        "......O.O",
-                        ".....OO.O",
-                        ".........",
-                        "....OOO.."
-                    ]
-                },
-                "Glider": {
-                    "position": "topleft",
-                    "rows": [
-                        ".O.",
-                        "..O",
-                        "OOO"
-                    ]
-                },
-                "Lightweight Spaceship": {
-                    "position": "left",
-                    "rows": [
-                        "O..O.",
-                        "....O",
-                        "O...O",
-                        ".OOOO"
-                    ]
-                },
-                "Gosper Glider Gun": {
-                    "position": "topleft",
-                    "rows": [
-                        "........................O",
-                        "......................O.O",
-                        "............OO......OO............OO",
-                        "...........O...O....OO............OO",
-                        "OO........O.....O...OO",
-                        "OO........O...O.OO....O.O",
-                        "..........O.....O.......O",
-                        "...........O...O",
-                        "............OO"
-                    ]
-                },
-                "Puffer Train": {
-                    "position": "left",
-                    "rows": [
-                        "...O.",
-                        "....O",
-                        "O...O",
-                        ".OOOO",
-                        ".....",
-                        ".....",
-                        ".....",
-                        "O....",
-                        ".OO..",
-                        "..O..",
-                        "..O..",
-                        ".O...",
-                        ".....",
-                        ".....",
-                        "...O.",
-                        "....O",
-                        "O...O",
-                        ".OOOO"
-                    ]
-                },
-            };
+                // Add pref-defined shape names to HTML selector
+                var shapeSelector = document.getElementById("shapeName");
+                for( var shapeName in shapes ) {
+                    var option = document.createElement("option");
+                    option.text = shapeName;
+                    shapeSelector.add(option);  
+                }
+                shapeSelector.value = "F-pentomino";
 
-            // Add pref-defined shape names to HTML selector
-            var shapeSelector = document.getElementById("shapeName");
-            for (var shapeName in shapes) {
-                var option = document.createElement("option");
-                option.text = shapeName;
-                shapeSelector.add(option);
-            }
-            shapeSelector.value = "F-pentomino";
+                // Get graphics elements from HTML
+                var canvas = document.getElementById("myCanvas");
+                var ctx = canvas.getContext("2d");
 
-            // Get graphics elements from HTML
-            var canvas = document.getElementById("myCanvas");
-            var ctx = canvas.getContext("2d");
+                // Set bounds of grid based on cannvas size
+                function setBounds() {
 
-            // Set bounds of grid based on cannvas size
-            setBounds = function () {
+                    zoom = START_ZOOM;
 
-                zoom = START_ZOOM;
+                    // Determine width and x coordinates
+                    cellsWide = Math.floor( canvas.width / zoom ) - 1;
+                    cellsLeft = Math.floor( ( canvas.width - zoom * cellsWide ) / 2 );
+                    cellsRight = cellsLeft + cellsWide * zoom;
 
-                // Determine width and x coordinates
-                cellsWide = Math.floor(canvas.width / zoom) - 1;
-                cellsLeft = Math.floor((canvas.width - zoom * cellsWide) / 2);
-                cellsRight = cellsLeft + cellsWide * zoom;
+                    // Determine height and y coordinates
+                    cellsHigh = Math.floor( canvas.height / zoom ) - 1;
+                    cellsTop = Math.floor( ( canvas.height - zoom * cellsHigh ) / 2 );
+                    cellsBottom = cellsTop + cellsHigh * zoom;
+                }
 
-                // Determine height and y coordinates
-                cellsHigh = Math.floor(canvas.height / zoom) - 1;
-                cellsTop = Math.floor((canvas.height - zoom * cellsHigh) / 2);
-                cellsBottom = cellsTop + cellsHigh * zoom;
-            }
+                // Make colony from pre-defined shape
+                function makeColony(shapeName, width, height) {
 
-            // Make colony from pre-defined shape
-            makeColony = function (shapeName, width, height) {
+                    var colony = new Colony();
 
-                var colony = new Colony();
+                    // Get shape from list
+                    var shape = shapes[shapeName];
+                    var position = shape["position"];
+                    var rows = shape["rows"];
 
-                // Get shape from list
-                var shape = shapes[shapeName];
-                var position = shape["position"];
-                var rows = shape["rows"];
+                    // Will determine size of shape
+                    var maxX = 0;
+                    var maxY = 0;
 
-                // Will determine size of shape
-                var maxX = 0;
-                var maxY = 0;
-
-                // Loop through shape, adding cells to colony
-                for (var y = 0; y < rows.length; y++) {
-                    var row = rows[y];
-                    for (var x = 0; x < row.length; x++) {
-                        if (row.charAt(x) == 'O') {
-                            colony.addCell(new Cell(x, y));
+                    // Loop through shape, adding cells to colony
+                    for (var y = 0; y < rows.length; y++) {
+                        var row = rows[y];
+                        for ( var x = 0; x < row.length; x++) {
+                            if ( row.charAt(x) == 'O' ) {
+                                colony.addCell( new Cell( x, y ) );
+                            }
+                            if ( x > maxY ) {
+                                maxX = x;
+                            }
                         }
-                        if (x > maxY) {
-                            maxX = x;
+                        maxY = y;
+                    }
+
+                    // Position colony on screen
+                    if ( position == "topleft" ) {
+                        ox = 2;
+                        oy = 2;
+                    } else if ( position == "left" ) {
+                        ox = 2
+                        oy = Math.floor( ( cellsHigh - maxY ) / 2 );
+                    } else {
+                        ox = Math.floor( ( cellsWide - maxX ) / 2 );
+                        oy = Math.floor( ( cellsHigh - maxY ) / 2 );
+                    }
+
+                    return colony;
+                }
+
+                // Draw grid over top of displayed colony
+                function drawGrid() {
+
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = '#808080';
+                    for ( var gx = cellsLeft; gx <= cellsRight; gx += zoom ) {
+                        ctx.beginPath();
+                        ctx.moveTo(gx, cellsTop);
+                        ctx.lineTo(gx, cellsBottom);
+                        ctx.stroke();
+                    }
+                    for ( var gy = cellsTop; gy <= cellsBottom; gy += zoom ) {
+                        ctx.beginPath();
+                        ctx.moveTo(cellsLeft, gy);
+                        ctx.lineTo(cellsRight, gy);
+                        ctx.stroke();
+                    }
+
+                    // Draw outer box
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = '#000000';
+                    ctx.beginPath();
+                    ctx.rect( cellsLeft - 1, cellsTop - 1, cellsWide * zoom + 2, cellsHigh * zoom + 2 );
+               
+                    ctx.stroke(); 
+               
+                    }
+
+                // Draw cell
+                function drawCell(dx, dy) {
+                    ctx.beginPath();
+                    var px = cellsLeft + dx * zoom + 1;
+                    var py = cellsTop + dy * zoom;
+                    ctx.fillRect( px - 1, py + 1, zoom - 1, zoom - 1 );
+                }
+                    
+                // Draw entire colony
+                function drawColony() {
+
+                    ctx.save();
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    // Loop through cells
+                    var cells = colony.getCells();
+                    for (var key in cells) {
+                        if (cells.hasOwnProperty(key)) { 
+
+                            var cell = cells[key];
+                            var dx = ox + cell.getX();
+                            var dy = oy + cell.getY();
+
+                            // If cell is on screen then draw it and record it
+                            if ( dx >= 0 && dx < cellsWide && dy >= 0 && dy < cellsHigh ) {
+                                drawCell( dx, dy );
+                            }
                         }
                     }
-                    maxY = y;
+
+                    drawGrid();
+
+                    ctx.restore();
+
+                    // Display colony info
+                    var stats = document.getElementById('stats');
+                    stats.innerHTML = "Generation: " + colony.getGeneration() + ", Cells: " + colony.getCellCount();
                 }
 
-                // Position colony on screen
-                if (position == "topleft") {
-                    ox = 2;
-                    oy = 2;
-                } else if (position == "left") {
-                    ox = 2
-                    oy = Math.floor((cellsHigh - maxY) / 2);
-                } else {
-                    ox = Math.floor((cellsWide - maxX) / 2);
-                    oy = Math.floor((cellsHigh - maxY) / 2);
-                }
-
-                return colony;
-            }
-
-            // Draw grid over top of displayed colony
-            drawGrid = function () {
-
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = '#808080';
-                for (var gx = cellsLeft; gx <= cellsRight; gx += zoom) {
-                    ctx.beginPath();
-                    ctx.moveTo(gx, cellsTop);
-                    ctx.lineTo(gx, cellsBottom);
-                    ctx.stroke();
-                }
-                for (var gy = cellsTop; gy <= cellsBottom; gy += zoom) {
-                    ctx.beginPath();
-                    ctx.moveTo(cellsLeft, gy);
-                    ctx.lineTo(cellsRight, gy);
-                    ctx.stroke();
-                }
-
-                // Draw outer box
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = '#000000';
-                ctx.beginPath();
-                ctx.rect(cellsLeft - 1, cellsTop - 1, cellsWide * zoom + 2, cellsHigh * zoom + 2);
-
-                ctx.stroke();
-
-            }
-
-            // Draw cell
-            drawCell = function (dx, dy) {
-                ctx.beginPath();
-                var px = cellsLeft + dx * zoom + 1;
-                var py = cellsTop + dy * zoom;
-                ctx.fillRect(px - 1, py + 1, zoom - 1, zoom - 1);
-            }
-
-            // Draw entire colony
-            drawColony = function () {
-
-                ctx.save();
-
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // Loop through cells
-                var cells = colony.getCells();
-                for (var key in cells) {
-                    if (cells.hasOwnProperty(key)) {
-
-                        var cell = cells[key];
-                        var dx = ox + cell.getX();
-                        var dy = oy + cell.getY();
-
-                        // If cell is on screen then draw it and record it
-                        if (dx >= 0 && dx < cellsWide && dy >= 0 && dy < cellsHigh) {
-                            drawCell(dx, dy);
-                        }
+                // Regenerate and redisplay on schedule
+                function update() {
+                    colony.regenerate();
+                    window.requestAnimationFrame(drawColony);
+                    if ( colony.getCellCount() == 0 || colony.getCellCount() > 999 ) {
+                        stop();
                     }
                 }
 
-                drawGrid();
+                // Start colony lifecycle
+                function start() {
+                    if ( ! timer ) {
+                        timer = setInterval(update, 100);
+                    }
+                }
 
-                ctx.restore();
+                // Pause colony liefcycle
+                function stop() {
+                    if ( timer ) {
+                        clearInterval(timer);
+                        timer = null;
+                    }
+                }
 
-                // Display colony info
-                var stats = document.getElementById('stats');
-                stats.innerHTML = "Generation: " + colony.getGeneration() + ", Cells: " + colony.getCellCount();
-            }
-
-            // Regenerate and redisplay on schedule
-            update = function () {
-                colony.regenerate();
-                window.requestAnimationFrame(drawColony);
-                if (colony.getCellCount() == 0 || colony.getCellCount() > 999) {
+                // Reset colony based on dropdown choice
+                function reset() {
                     stop();
+                    setBounds();
+                    var shapeName = document.getElementById("shapeName").value;
+                    colony = makeColony( shapeName, cellsWide, cellsHigh );
+                    drawColony();
                 }
-            }
 
-            // Start colony lifecycle
-            start = function () {
-                if (!timer) {
-                    timer = setInterval(update, 100);
+                // Clear colony
+                function clear() {
+                    stop();
+                    colony = new Colony();
+                    setBounds();
+                    drawColony();
                 }
-            }
 
-            // Pause colony liefcycle
-            stop = function () {
-                if (timer) {
-                    clearInterval(timer);
-                    timer = null;
+                // Alow user to cick on cell to toggle it
+                function toggle(ev) {
+
+                    var rect = canvas.getBoundingClientRect();
+                    var px = ev.clientX - rect.left;
+                    var py = ev.clientY - rect.top;
+                    var cx = Math.floor( ( px - cellsLeft ) / zoom ) - ox;
+                    
+                    var cy = Math.floor( ( py - cellsTop ) / zoom ) - oy;
+                    
+                    colony.toggle(new Cell(cx, cy ));
+                    
+                    drawColony();
                 }
-            }
+                canvas.addEventListener('click', toggle, false);
 
-            // Reset colony based on dropdown choice
-            reset = function () {
-                stop();
-                setBounds();
-                var shapeName = document.getElementById("shapeName").value;
-                colony = makeColony(shapeName, cellsWide, cellsHigh);
-                drawColony();
-            }
+                // Reset when starting or changing shape
+                reset();
 
-            // Clear colony
-            clear = function () {
-                stop();
-                colony = new Colony();
-                setBounds();
-                drawColony();
-            }
+                return {
+                    start:start,
+                    stop:stop,
+                    reset:reset,
+                    clear:clear
+                }
 
-            // Alow user to cick on cell to toggle it
-            toggle = function (ev) {
+            }();
 
-                var rect = canvas.getBoundingClientRect();
-                var px = ev.clientX - rect.left;
-                var py = ev.clientY - rect.top;
-                var cx = Math.floor((px - cellsLeft) / zoom) - ox;
+        </script>
 
-                var cy = Math.floor((py - cellsTop) / zoom) - oy;
-
-                colony.toggle(new Cell(cx, cy));
-
-                drawColony();
-            }
-            canvas.addEventListener('click', toggle, false);
-
-            // Reset when starting or changing shape
-            reset();
-
-            return {
-                start: start,
-                stop: stop,
-                reset: reset,
-                clear: clear
-            }
-
-        }();
-
-    </script>
-
-</body>
-
+    </body>
 </html>
